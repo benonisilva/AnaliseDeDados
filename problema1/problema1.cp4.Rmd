@@ -1,0 +1,36 @@
+---
+title: "problema1.cp4.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("ggplot2")
+library("dplyr")
+dados <- read.csv("ano-atual.csv")
+publicidade.variaveis <- c("txNomeParlamentar","sgUF","sgPartido",
+              "txtDescricao","txtDescricaoEspecificacao","vlrLiquido",
+              "txtFornecedor","txtCNPJCPF","indTipoDocumento","numMes","numAno")
+publicidade.colNum <- match(publicidade.variaveis,names(dados))
+dados.publicidade <- filter(select(dados,publicidade.colNum),grepl("DIVULGAÇÃO",txtDescricao))
+
+```
+
+## Que empresas e qual o perfil delas das que mais ganham com o dinheiro das cotas com publicidade dos nossos deputados? 
+
+Usaremos dados coletados do site de transparência da câmara dos deputados. Dados vindos de: <http://www2.camara.leg.br/transparencia/cota-para-exercicio-da-atividade-parlamentar/dados-abertos-cota-parlamentar>.
+Nosso foco será em relação a cota com publicidade, que é onde eles mais gastam e onde temos a maior variação de gastos como vemos no gráfico abaixo.
+
+```{r dados, echo=FALSE}
+bp <- ggplot(select(dados,publicidade.colNum), aes(factor(txtDescricao), vlrLiquido))
+bp + geom_boxplot() +  coord_flip() + ylab("Gastos") + xlab("Tipo de Gasto")
+```
+
+
+
+```{r dados, echo=FALSE}
+  dados.publicidade.byFornecedor <- summarise(group_by(dados.publicidade,txtFornecedor),
+                                              Total=sum(vlrLiquido),NumeroDeCandidatos=n_distinct(txNomeParlamentar),NumeroDeEstados=n_distinct(sgUF),NumeroDePartidos=n_distinct(sgPartido))
+
+
+```

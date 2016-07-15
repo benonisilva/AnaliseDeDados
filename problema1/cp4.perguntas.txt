@@ -1,0 +1,5 @@
+ 1) Valendo-se dos relatorio 2 que mostra que o maior gasto é com divulgação parlamentar, que empresas mais ganharam e qual o seu perfil. 
+1 a) que empresas atendem a mais de um cadidato? são do mesmo partido? , são do mesmo estado? os valores sao parecidos?
+ o foco é procurar possiveis empresas que sejam apenas de lavagem, empresas que tem valores altos e apenas um candidato são suspeitas, assim como empresas que atendem candidatos só de um partido.
+
+
