@@ -1,0 +1,37 @@
+---
+title: "prob3.cp1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+dados <- read.csv("emendas_detalhes_parlamentar.csv")
+dados <- select(dados,VALOR_REPASSE_PROPOSTA_EMENDA,TIPO_PARLAMENTAR,UF_PROPONENTE,NATUREZA_JURIDICA,ANO_PROP,DESC_ORGAO,MODALIDADE,NM_PROPONENTE,OBJETO_PROPOSTA,funcao.imputada)
+dados.sumarise.gByTipoParlamentar <- summarise(group_by(dados,TIPO_PARLAMENTAR,NM_PROPONENTE),TOTAL=sum(VALOR_REPASSE_PROPOSTA_EMENDA))
+dados.sumarise.gByUF.tipo_parlamentar <- summarise(group_by(dados,UF_PROPONENTE,TIPO_PARLAMENTAR),TOTAL=sum(VALOR_REPASSE_PROPOSTA_EMENDA))
+dados.sumarise.gByUF.ano <- summarise(group_by(dados,UF_PROPONENTE,ANO_PROP),TOTAL=sum(VALOR_REPASSE_PROPOSTA_EMENDA))
+dados.sumarise.gByAno.Uf <- summarise(group_by(dados,ANO_PROP,UF_PROPONENTE),TOTAL=sum(VALOR_REPASSE_PROPOSTA_EMENDA))
+```
+
+## Descrição dos Dados
+Foi usado os dados detalhados  <https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/emendas_detalhes_parlamentar.csv.tgz>.
+As variavies para uma exploração previas foram escolhidas(VALOR_REPASSE_PROPOSTA_EMENDA,TIPO_PARLAMENTAR,UF_PROPONENTE,NATUREZA_JURIDICA,ANO_PROP,DESC_ORGAO,MODALIDADE,NM_PROPONENTE,OBJETO_PROPOSTA,funcao.imputada) levando em consideração seu significado para o problema.
+
+```{r plotsummary}
+bp <- ggplot(dados.sumarise.gByUF.tipo_parlamentar,aes(UF_PROPONENTE,TOTAL))
+bp + geom_boxplot() + coord_flip()
+bp <- ggplot(dados.sumarise.gByAno.Uf,aes(as.factor(ANO_PROP),TOTAL))
+bp + geom_boxplot()
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
