@@ -7,6 +7,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
+library(cluster)
+library(tidyr)
 dados <- read.csv("emendas_detalhes_parlamentar.csv")
 dados <- select(dados,VALOR_REPASSE_PROPOSTA_EMENDA,TIPO_PARLAMENTAR,UF_PROPONENTE,NATUREZA_JURIDICA,ANO_PROP,DESC_ORGAO,MODALIDADE,NM_PROPONENTE,OBJETO_PROPOSTA,funcao.imputada)
 summary(dados)
@@ -14,6 +16,7 @@ dados.sumarise.gByTipoParlamentar <- summarise(group_by(dados,TIPO_PARLAMENTAR,N
 dados.sumarise.gByUF.tipo_parlamentar <- summarise(group_by(dados,UF_PROPONENTE,TIPO_PARLAMENTAR),TOTAL=sum(VALOR_REPASSE_PROPOSTA_EMENDA))
 dados.sumarise.gByUF.ano <- summarise(group_by(dados,UF_PROPONENTE,ANO_PROP),TOTAL=sum(VALOR_REPASSE_PROPOSTA_EMENDA))
 dados.sumarise.gByAno.Uf <- summarise(group_by(dados,ANO_PROP,UF_PROPONENTE),TOTAL=sum(VALOR_REPASSE_PROPOSTA_EMENDA))
+dados.sumarise.gTipo.Uf <- summarise(group_by(dados,funcao.imputada, UF_PROPONENTE),TOTAL=sum(VALOR_REPASSE_PROPOSTA_EMENDA))
 ```
 
 ## Descrição dos Dados
@@ -25,14 +28,15 @@ bp <- ggplot(dados.sumarise.gByUF.tipo_parlamentar,aes(UF_PROPONENTE,TOTAL))
 bp + geom_boxplot() + coord_flip()
 bp <- ggplot(dados.sumarise.gByAno.Uf,aes(as.factor(ANO_PROP),TOTAL))
 bp + geom_boxplot()
+bp <- ggplot(dados.sumarise.gTipo.Uf,aes(as.factor(funcao.imputada),TOTAL))
+bp + geom_boxplot()+ coord_flip()
 ```
 
-## Including Plots
+## Resultado da sumarização dos dados
+Os dados sumarizados resultante nas plotagens acima nos indicam três possiveis escolhas para as variaveis.
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r agrup_hie}
+  dados.sumarise.gTipo <- summarise(group_by(dados.sumarise.gTipo.Uf,funcao.imputada,UF_PROPONENTE),MEDIA=mean(TOTAL))
+  dados.gTipo.Uf.matrix <- spread(dados.sumarise.gTipo,funcao.imputada,MEDIA)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
