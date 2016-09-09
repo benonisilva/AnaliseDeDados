@@ -1,5 +1,5 @@
 ---
-title: "prob3.cp1"
+title: "prob3.cp2"
 output: html_document
 ---
 
@@ -9,6 +9,8 @@ library(dplyr)
 library(ggplot2)
 library(cluster)
 library(tidyr)
+library(Rtsne)
+library(ggfortify)
 dados <- read.csv("emendas_detalhes_parlamentar.csv")
 dados <- select(dados,VALOR_REPASSE_PROPOSTA_EMENDA,TIPO_PARLAMENTAR,UF_PROPONENTE,NATUREZA_JURIDICA,ANO_PROP,DESC_ORGAO,MODALIDADE,NM_PROPONENTE,OBJETO_PROPOSTA,funcao.imputada)
 summary(dados)
@@ -23,20 +25,21 @@ dados.sumarise.gTipo.Uf <- summarise(group_by(dados,funcao.imputada, UF_PROPONEN
 Foi usado os dados detalhados  <https://github.com/nazareno/ciencia-de-dados-1/blob/master/dados/emendas_detalhes_parlamentar.csv.tgz>.
 As variavies para uma exploração previas foram escolhidas(VALOR_REPASSE_PROPOSTA_EMENDA,TIPO_PARLAMENTAR,UF_PROPONENTE,NATUREZA_JURIDICA,ANO_PROP,DESC_ORGAO,MODALIDADE,NM_PROPONENTE,OBJETO_PROPOSTA,funcao.imputada) levando em consideração seu significado para o problema.
 
-```{r plotsummary}
-bp <- ggplot(dados.sumarise.gByUF.tipo_parlamentar,aes(UF_PROPONENTE,TOTAL))
-bp + geom_boxplot() + coord_flip()
-bp <- ggplot(dados.sumarise.gByAno.Uf,aes(as.factor(ANO_PROP),TOTAL))
-bp + geom_boxplot()
-bp <- ggplot(dados.sumarise.gTipo.Uf,aes(as.factor(funcao.imputada),TOTAL))
-bp + geom_boxplot()+ coord_flip()
-```
-
 ## Resultado da sumarização dos dados
-Os dados sumarizados resultante nas plotagens acima nos indicam três possiveis escolhas para as variaveis.
+Temos 18 dimensões nos nossos dados referente a cada funcao imputada em um total de 27 estados que corresponde ao estado da federação ao qual destinada a verba.
 
-```{r agrup_hie}
+```{r summarizacao}
   dados.sumarise.gTipo <- summarise(group_by(dados.sumarise.gTipo.Uf,funcao.imputada,UF_PROPONENTE),MEDIA=mean(TOTAL))
   dados.gTipo.Uf.matrix <- spread(dados.sumarise.gTipo,funcao.imputada,MEDIA)
+   dados.gTipo.Uf.matrix[is.na(dados.gTipo.Uf.matrix)] <- 0
 ```
+
+## Redução a 2 dimenssões usando PCA.
+
+
+```{r pca}
+
+
+```
+
 
