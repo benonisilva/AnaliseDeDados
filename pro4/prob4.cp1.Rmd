@@ -1,0 +1,50 @@
+---
+title: "prob4.cp1.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+dados.filmes <- read.csv("./ml-latest-small/movies.csv")
+dados.notas <- read.csv("./ml-latest-small/ratings.csv")
+```
+
+## Avaliação para qual dos episódios da trilogia há melhor avaliação e para qual há mais variação nas notas atribuídas ao filme Poderoso Chefão.
+
+```{r triogia_poderoso}
+
+dados.poderoso.ids <- c(858,1221,2023)
+dados.poderoso.nomes <- 
+  dados.filmes %>% filter(movieId %in% dados.poderoso.ids) %>% select(movieId,title)
+
+dados.poderoso.notas <- 
+  dados.notas %>% filter(movieId %in% dados.poderoso.ids)
+
+dados.poderoso.notas <- left_join(dados.poderoso.notas,dados.poderoso.nomes)
+
+dados.poderoso.notas.groupById <- 
+  dados.poderoso.notas %>% group_by(movieId)
+
+dados.poderoso.notas.medias <- 
+  dados.poderoso.notas.groupById %>% summarise(mean(rating))
+
+bp <- ggplot(dados.poderoso.notas, aes(factor(title), rating))
+bp + geom_boxplot(outlier.colour = "green", outlier.size = 3)
+
+
+
+```
+
+## Resultados das avaliações da 
+
+
+
+
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
