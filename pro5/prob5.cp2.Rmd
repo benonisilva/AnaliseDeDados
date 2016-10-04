@@ -1,0 +1,42 @@
+---
+title: "prob5.cp2.Rmd"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+dados <- read.csv("speed-dating.csv")
+```
+
+## Analise de encontros romanticos.
+Com a presente analise queremos responder duas perguntas basicas:
+1) A idade tende a deixar as pessoas mais permissivas, ou seja, elas tendem a ser mais generosas na avaliação do outro?
+2) A diferença de idade influencia na avaliação do outro?
+
+
+## Descrevendo dados.
+Os dados foram tirados de <https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating>.
+
+```{r descricao}
+  dados.idade_likes <- dados %>% select(iid,age,like) %>% group_by(iid,age)
+  ggplot(dados.idade_likes, aes(age)) +
+  geom_histogram()
+  
+  ggplot(summarise(dados.idade_likes,media=mean(like)), aes(x = age, y = media)) + 
+  geom_point(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE)
+  mod <- lm(age ~ like, data = dados.idade_likes)
+  summary(mod)
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
