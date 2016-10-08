@@ -7,36 +7,85 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(ggplot2)
-dados <- read.csv("speed-dating.csv")
+library(broom)
+library(simpleboot)
+dados <- read.csv("dados.csv")
+
 ```
 
 ## Analise de encontros romanticos.
 Com a presente analise queremos responder duas perguntas basicas:
-1) A idade tende a deixar as pessoas mais permissivas, ou seja, elas tendem a ser mais generosas na avaliação do outro?
-2) A diferença de idade influencia na avaliação do outro?
+1) A diferença de idade influencia na avaliação do outro?
+2) Qual a influencia da atração tem no gostar do outro par?
 
 
 ## Descrevendo dados.
 Os dados foram tirados de <https://github.com/nazareno/ciencia-de-dados-1/tree/master/5-regressao/speed-dating>.
+O histograma mostra que existe uma alta concentração de encontro com pessoas da mesma.
+Foi adicionada uma nova variavel(dif_age) que eh a diferença da idade do paricipante e de
+seu par. Vemos que a maioria dos encontros se da entre participantes com idades parecidas e que mulheres tendem a ter encontros com homens mais velhos e homens vice-versa.
+O grafico entre like(quanto o participante gostou do outro) versus dif_age nao mostra
+uma tendencia de imediato.
+
 
 ```{r descricao}
-  dados.idade_likes <- dados %>% select(iid,age,like) %>% group_by(iid,age)
-  ggplot(dados.idade_likes, aes(age)) +
-  geom_histogram()
+  dados.idade_likes <- dados %>% select(iid,age,age_o,gender,like,shar,prob,attr,int_corr) %>% mutate(dif_age=age-age_o)
+  ggplot(dados.idade_likes, aes(dif_age,colour= as.factor(gender) )) +
+  geom_freqpoly()
   
-  ggplot(summarise(dados.idade_likes,media=mean(like)), aes(x = age, y = media)) + 
-  geom_point(alpha = 0.4) + geom_smooth(method = "lm", se = FALSE)
-  mod <- lm(age ~ like, data = dados.idade_likes)
+  ggplot(dados.idade_likes, aes(x = dif_age, y = like)) + 
+  geom_point()
+  mod <- lm(like ~ dif_age, data = dados.idade_likes)
+  tidy(mod, conf.int = TRUE)
+
+```
+
+## O modelo like=dif_age*0.005844
+Vemos que b1 tem um intervalo de confiança [-0.006171958 0.01785899] que apesar de estar
+com uma pequena porção no zero nos leva a dizer que não existe relação entre gostar de alguem e diferença de idade. Com R-squared=0.0001932 e	Adjusted R-squared=-1.933e-05 reforça nossa analise. Diante disso o dados sobre residuos se tornam irrelavantes.
+
+## Dividindo os dados por genero.
+
+Diate disse tentamos separar em dois grupos para ver o efeito separados por genero criado dois modelos alternativos(Um para mulheres e outro para homens). Os modelos para homens e mulheres parem ter tendencias opostas. No modelo para homens quanto mais jovem o par
+maior eh o like, ja no modelo para mulheres a tendencia eh oposta. Mas mais uma vez temos intervalos de confiança com zero incluido o que nos garante com 95% de probabilidade de descartar o modelo.
+
+```{r modelos}
+  
+  dados.mulheres.likes <- filter(dados.idade_likes,gender==0)
+  dados.homens.likes <- filter(dados.idade_likes,gender==1)
+  
+  mod.homens <- lm(like ~ dif_age, data = dados.homens.likes)
+  mod.mulheres <- lm(like ~ dif_age, data = dados.mulheres.likes)
+  
+    ggplot( dados.homens.likes, aes(x = dif_age, y = dif_age)) + 
+  geom_point()
+        ggplot( dados.mulheres.likes, aes(x = dif_age, y = like)) + 
+  geom_point()
+        
+  tidy(mod.homens, conf.int = TRUE)
+  tidy(mod.mulheres, conf.int = TRUE)
+  
+```
+
+## Pergunta 2.
+
+```{r pergunta2}
+  
+  mod <- lm(like ~ attr, data = dados.idade_likes)
+    ggplot(dados.idade_likes, aes(dif_age,colour= as.factor(gender) )) +
+  geom_freqpoly()
+  
+  ggplot(dados.idade_likes, aes(x = attr, y = like)) + 
+  geom_point()+
+    geom_line(aes(y = predict(mod, dados.idade_likes)), colour = "red")
+  
+
+  tidy(mod, conf.int = TRUE)
   summary(mod)
-
+  autoplot(mod)
+  
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+A atração parece ter um peso importante no like do par do encontro. Principalmente entre [4-10] (temos uma pequena tendencia entre [0-4]) como mostra o grafico dos Residuals vs Fitted. O modelo like=attr*0.6378654+2.1825407
+Eh abalisado pelo p-value e pelo intervalo de confiança. O R^2 nos mostra tambem que 
+muito, mais de 40%, do like eh explicado pela atrr. 
